@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title th:text="'Davis | ' + ${name}"></title>
+  <meta name="description" content="">
+  <link rel="stylesheet" th:href="@{/styles/work/projects.css}">
+  <!--/*/ <th:block th:insert="~{fragments/main.html :: headerfiles}"> </th:block> /*/-->
+</head>
+
+<body>
+  <header th:replace="~{fragments/main.html :: header}"></header>
+  <div class="container mb-5">
+    <div class="row">
+      <div class="col-12 text-center pb-5">
+        <h2 th:text="${name}"></h2>
+        <p th:text="${description}"></p>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <img th:src="@{/images/work/project/technology-icon.png}"
+          style="display: block; margin-left: auto; margin-right: auto;" height=100px>
+        <h3 class="text-center">Technologies Used</h3>
+        <ul style="list-style-position: inside; margin-right:3rem;">
+          <li th:each="technologyName: ${technologies}" th:text="${technologyName}"></li>
+        </ul>
+        <br>
+      </div>
+      <div class="accordion col-12 col-lg-6" id="challengesAccordion">
+        <img th:src="@{/images/work/project/problem.png}" style="display: block; margin-left: auto; margin-right: auto;"
+          height=100px>
+        <h3 class="text-center">Features and Development Challenges</h3>
+        <th:block th:each="feature, featureStatus: ${features}">
+        <div class="accordion-item">
+          <div class="accordion-header" th:id="${featureStatus.index} + 'Heading'" style="text-align: center !important;">
+            <h5 class="mb-0">
+              <button class="accordion-button collapsed" data-bs-toggle="collapse" th:data-bs-target="'#collapse' + ${featureStatus.index}"
+                aria-expanded="true" th:aria-controls="'collapse' + ${featureStatus.index}" th:text="${feature.name}">
+              </button>
+            </h5>
+          </div>
+          <div th:id="'collapse' + ${featureStatus.index}" class="collapse" th:aria-labelledby="${featureStatus.index} + 'Heading'"
+            data-bs-parent="#challengesAccordion">
+            <div class="accordion-body">
+              <p th:text="${feature.description}"></p>
+            </div>
+          </div>
+        </div>
+        </th:block>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <!--/*/ <th:block th:insert="~{fragments/main.html :: footer}"> </th:block> /*/-->
+  </footer>
+</body>
+
+</html>

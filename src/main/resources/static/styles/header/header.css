@@ -1,0 +1,26 @@
+.header-image{
+	color: white;
+	background: white;
+	background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url("/images/header/header.webp");
+	height: 300px;
+	padding: 20px;
+	position: relative;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: cover;
+	filter: brightness 50%;
+	margin-bottom: 2.5rem;
+}
+
+
+.header-text-center{
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.header-text{
+	text-align: center;
+	font-size: calc(32pt + 1.2vw);
+}

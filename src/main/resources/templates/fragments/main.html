@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html>
+  <th:block th:fragment="headerfiles">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/styles/header/header.css}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  </th:block>
+  <body>
+    <header th:fragment="header">
+      <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light" id="topNavBar">
+        <div class="navbar-brand" href="#" id="topNavBarName"></div>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavBar" araia-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNavBar">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">My Work</a>
+              <div class="dropdown-menu dropdown-menu-right">
+                <a class="dropdown-item" href="/work">All Work</a>
+                <div class="dropdown-divider"></div>
+                <!--TODO: Add backend connection to get these urls-->
+                <a class="dropdown-item" href="/work/skaterxl">SkaterXL Multiplayer Mod</a>
+                <a class="dropdown-item" href="/work/blades">Blades of Orterra</a>
+                <a class="dropdown-item" href="/work/website">My Website</a>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/blog">Blog</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <div class="header-image"><div class="header-text-center"><h1 class="header-text">Davis Ellwood</h1></div></div>
+    </header>
+
+    <th:block th:fragment="footer">
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>  
+    </th:block>
+  </body>
+</html>

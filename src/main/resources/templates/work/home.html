@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Davis | Work</title>
+    <meta name="description" content="Work Description">
+    <!--/*/ <th:block th:insert="~{fragments/main.html :: headerfiles}"> </th:block> /*/-->
+    <link rel="stylesheet" th:href="@{/styles/work/carousel.css}">
+  </head>
+
+  <body>
+    <header th:replace="~{fragments/main.html :: header}"></header>
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <h1 class="text-center">My Work</h1>
+          <p class="text-center">
+            Over the last 10 years I've had the opportunity to learn a wide range of skills and tools in
+            programming and use them to create amazing products independantly and with teams.
+            Below you'll find examples of what I consider to be my most impressive works to date.
+            Each project has it's own page if you'd like to learn more about it and some of the development
+            challenges.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row no-gutters py-3">
+        <div class="col-12 col-lg-8 offset-lg-2">
+          <div id="workCarousel" class="carousel slide" style="background-color:black" data-bs-ride="carousel">
+            <ol class="carousel-indicators">
+              <li data-bs-target="#workCarousel" data-bs-slide-to="0" class="active"></li>
+              <li data-bs-target="#workCarousel" data-bs-slide-to="1"></li>
+              <li data-bs-target="#workCarousel" data-bs-slide-to="2"></li>
+            </ol>
+            <!--TODO: Add backend connection to get these images and create carousel with th:each-->
+            <div class="carousel-inner" role="listbox">
+              <div class="carousel-item active" data-bs-interval="2000">
+                <a href="/work/skaterxl">
+                  <img class="d-block w-100" th:src="@{/images/work/sxlmultiplayer.jpg}" alt="SkaterXL Multiplayer Mod">
+                  <div class="carousel-caption d-none d-md-block">
+                    <h5>SkaterXL Mutliplayer Mod</h5>
+                  </div>
+                </a>
+              </div>
+              <div class="carousel-item" data-bs-interval="2000">
+                <a href="/work/blades"><img class="d-block w-100" th:src="@{/images/work/blades.jpg}" alt="Blades Of Orterra"></a>
+                <div class="carousel-caption d-none d-md-block">
+                  <h5>Blades of Orterra:<br>Multiplayer Combat Arena</h5>
+                </div>
+              </div>
+              <div class="carousel-item" data-bs-interval="2000">
+                <a href="/work/website"><img class="d-block w-100" th:src="@{/images/work/inception.png}" alt="This Website"></a>
+                <div class="carousel-caption d-none d-md-block">
+                  <h5>DavisEllwood.com</h5>
+                </div>
+              </div>
+            </div>
+            <a class="carousel-control-prev" data-bs-target="#workCarousel" type="button" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </a>
+            <a class="carousel-control-next" data-bs-target="#workCarousel" type="button" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <!--/*/ <th:block th:insert="~{fragments/main.html :: footer}"> </th:block> /*/-->
+    </footer>
+  </body>
+
+</html>
