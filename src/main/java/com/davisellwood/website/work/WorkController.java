@@ -37,11 +37,6 @@ public class WorkController {
                                         .features(List.of(
                                             new ProjectFeature("", "")
                                         )).build()
-        /*"website", WorkProject.builder().name("Portfolio Website")
-                                           .description("In 2019 I set out to create a simple portfolio website to showcase interesting and unique projects I've created, ironically it has become one of my most complex endeavours and a staple of the portfolio it was meant to showcase. Shortly after setting up a barebones back-end for displaying webpages, my ambitions heightened to creating an API that could be accessed from other projects and now receives over 3000 requests per hour. Below you can find a list of technologies, features of my API, and development challenges associated with those features.")
-                                           .technologies(List.of("Java", "Spring Boot", "AWS EC2", "AWS DynamoDB", "AWS S3", "HTML/CSS", "Bootstrap", "Javascript", "Thymeleaf"))
-                                           .features(List.of())
-                                           .build()*/
     );
 
     @GetMapping(PATH_PREFIX)
