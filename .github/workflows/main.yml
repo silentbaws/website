@@ -1,4 +1,4 @@
-name: CI
+name: Deploy
 
 permissions:
   contents: read
@@ -27,7 +27,9 @@ jobs:
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITAL_OCEAN_API_KEY }}
-      - name: docker push
+      - name: docker login
         run:
           doctl registry login
+      - name: docker push
+        run:
           docker push registry.digitalocean.com/davisellwoodwebsite/website:latest
