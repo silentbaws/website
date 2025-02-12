@@ -16,6 +16,7 @@
 
 	<properties>
 		<java.version>17</java.version>
+		<imageName>davisellwood/website:latest</imageName>
 	</properties>
 
 	<dependencyManagement>
@@ -196,6 +197,9 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+                    			<image>
+						<name>${imageName}</name>
+					</image>
 				</configuration>
 			</plugin>
 		</plugins>
