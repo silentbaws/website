@@ -21,14 +21,13 @@ jobs:
           java-version: '17'
           cache: maven
           distribution: corretto
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3.3.0
-        with:
-          registry: registry.digitalocean.com
-          username: ${{ secrets.DIGITAL_OCEAN_USER }}
-          password: ${{ secrets.DIGITAL_OCEAN_API_KEY }}
       - name: Maven Build
         run: ./mvnw spring-boot:build-image -DimageName=registry.digitalocean.com/davisellwoodwebsite/website:latest
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITAL_OCEAN_API_KEY }}
       - name: docker push
         run:
+          doctl registry login
           docker push registry.digitalocean.com/davisellwoodwebsite/website:latest
