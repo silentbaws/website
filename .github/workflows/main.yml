@@ -28,7 +28,7 @@ jobs:
           username: ${{ secrets.DIGITAL_OCEAN_USER }}
           password: ${{ secrets.DIGITAL_OCEAN_API_KEY }}
       - name: Maven Build
-        run: ./mvnw spring-boot:build-image -DimageName=registry.digitalocean.com/davisellwood/website:latest
+        run: ./mvnw spring-boot:build-image -DimageName=registry.digitalocean.com/davisellwoodwebsite/website:latest
       - name: docker push
         run:
-          docker push registry.digitalocean.com/davisellwood/website:latest
+          docker push registry.digitalocean.com/davisellwoodwebsite/website:latest
