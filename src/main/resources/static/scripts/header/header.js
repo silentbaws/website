@@ -19,4 +19,4 @@ const setActive = () => {
   };
 }
 
-window.onload = setActive();
+window.addEventListener("load", setActive);
