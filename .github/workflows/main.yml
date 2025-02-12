@@ -22,7 +22,7 @@ jobs:
           cache: maven
           distribution: corretto
       - name: Maven Build
-        run: ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=registry.digitalocean.com/davisellwood/website:latest
+        run: ./mvnw spring-boot:build-image
       - name: Log in to the Container registry
         uses: docker/login-action@v3.3.0
         with:
@@ -31,4 +31,4 @@ jobs:
           password: ${{ secrets.DIGITAL_OCEAN_API_KEY }}
       - name: docker push
         run:
-          docker push registry.digitalocean.com/davisellwood/website:latest
+          docker push docker.io/davisellwood/website:latest
