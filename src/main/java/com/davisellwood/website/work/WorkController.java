@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ServerErrorException;
 
 import com.davisellwood.website.dagger.interfaces.Database;
+import com.davisellwood.website.dagger.interfaces.ObjectStore;
 import com.davisellwood.website.dagger.spring.bindings.SpringStorageProvider;
 import com.davisellwood.website.models.ProjectFeature;
 import com.davisellwood.website.models.WorkProject;
@@ -25,10 +26,12 @@ public class WorkController {
     public static final String PATH_PREFIX = "work";
 
     private final Database database;
+    private final ObjectStore objectStore;
 
     @Inject
     public WorkController(SpringStorageProvider storageProvider) {
         this.database = storageProvider.database();
+        this.objectStore = storageProvider.objectStore();
     }
 
     // TODO: Migrate to database storage and retrieval

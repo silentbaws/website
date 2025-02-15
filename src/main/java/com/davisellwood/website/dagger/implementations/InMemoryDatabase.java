@@ -12,6 +12,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.davisellwood.website.dagger.interfaces.Database;
+import com.davisellwood.website.dagger.interfaces.ObjectStore;
 
 import lombok.extern.slf4j.Slf4j;
 import proto.davisellwood.website.cheapskate.CheapSkateDatabase;
@@ -21,12 +22,28 @@ import proto.davisellwood.website.cheapskate.CheapSkateDatabase.Database.DBEntry
 public class InMemoryDatabase implements Database {
     private static long SAVE_PERIOD = 15 * 1000;
 
+    private final ObjectStore objectStore;
+
     private final ConcurrentHashMap<String, DBEntry> store;
     private final Timer saveTimer;
 
     private final Timer loadTimer;
     private boolean hasLoadedFromBucket = false;
 
+    public InMemoryDatabase(ObjectStore objectStore) {
+        log.info("Creating new in memory database");
+        this.objectStore = objectStore;
+
+        store = new ConcurrentHashMap<String, DBEntry>();
+
+        this.loadTimer = new Timer();
+        loadTimer.scheduleAtFixedRate(new LoadTask(), 1000 , 15000);
+
+        saveTimer = new Timer();
+        saveTimer.scheduleAtFixedRate(new SaveTask(), 10 * 1000, SAVE_PERIOD);
+    }
+
+    // TODO: remove
     private static String createRandomString() {
         int leftLimit = 97; // letter 'a'
         int rightLimit = 122; // letter 'z'
@@ -40,6 +57,8 @@ public class InMemoryDatabase implements Database {
                 .toString();
     }
 
+    
+    // TODO: Save to storage and read from storage for real
     private class SaveTask extends TimerTask {
         @Override
         public void run() {
@@ -88,18 +107,6 @@ public class InMemoryDatabase implements Database {
             } catch (FileNotFoundException e) {
             } catch (IOException e) { }
         }
-    }
-    
-    public InMemoryDatabase() {
-        log.info("Creating new in memory database");
-
-        store = new ConcurrentHashMap<String, DBEntry>();
-
-        this.loadTimer = new Timer();
-        loadTimer.scheduleAtFixedRate(new LoadTask(), 1000 , 15000);
-
-        saveTimer = new Timer();
-        saveTimer.scheduleAtFixedRate(new SaveTask(), 10 * 1000, SAVE_PERIOD);
     }
 
     @Override

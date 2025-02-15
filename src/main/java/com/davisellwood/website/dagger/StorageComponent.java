@@ -1,5 +1,6 @@
 package com.davisellwood.website.dagger;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import com.davisellwood.website.dagger.interfaces.Database;
@@ -11,5 +12,5 @@ import dagger.Component;
 @Component(modules = StorageModule.class)
 public interface StorageComponent {
     Database provideDatabase();
-    ObjectStore provideObjectStore();
+    @Named("static-store") ObjectStore provideObjectStore();
 } 
