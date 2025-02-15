@@ -1,10 +1,14 @@
 package com.davisellwood.website.dagger.interfaces;
 
+import java.util.List;
 import java.util.Optional;
 import javax.inject.Singleton;
+
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 @Singleton
 public interface ObjectStore {
     boolean put(String key, byte[] value);
     Optional<byte[]> get(String key);
+    Optional<List<S3Object>> listObjects();
 }

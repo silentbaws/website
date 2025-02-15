@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package proto.davisellwood.website.models;
+
+message ProjectFeature {
+    string name = 1;
+    string description = 2;
+}
+
+message ProgrammingProject {
+    string name = 1;
+    string description = 2;
+    repeated string technologies = 3;
+    repeated ProjectFeature features = 4;
+}

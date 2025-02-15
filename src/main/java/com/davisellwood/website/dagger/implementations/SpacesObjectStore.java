@@ -17,7 +17,9 @@ import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 @Slf4j
 public class SpacesObjectStore implements ObjectStore {
@@ -27,6 +29,7 @@ public class SpacesObjectStore implements ObjectStore {
     private final String bucketKey;
     private final String bucketName;
 
+    // TODO: Inject this and update access keys to be for both buckets
     private class SpacesCredentialProvider implements AwsCredentialsProvider {
         @Override
         public AwsCredentials resolveCredentials() {
@@ -55,6 +58,7 @@ public class SpacesObjectStore implements ObjectStore {
                 .build();
     }
 
+    // TODO: Probably update Optional response to Either<Error, Response> and log from the caller
     @Override
     public Optional<byte[]> get(String key) {
         try {
@@ -75,6 +79,17 @@ public class SpacesObjectStore implements ObjectStore {
             return resp.sdkHttpResponse().statusCode() == HttpStatus.OK.value();
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    @Override
+    public Optional<List<S3Object>> listObjects() {
+        try {
+            var resp = client.listObjectsV2(ListObjectsV2Request.builder().bucket(bucketName).build());
+
+            return Optional.of(resp.contents());
+        } catch (Exception e) {
+            return Optional.empty();
         }
     }
     

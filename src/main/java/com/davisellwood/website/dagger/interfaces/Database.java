@@ -2,8 +2,10 @@ package com.davisellwood.website.dagger.interfaces;
 
 import javax.inject.Singleton;
 
+import proto.davisellwood.website.cheapskate.CheapSkateDatabase.Database.DBEntry;
+
 @Singleton
 public interface Database {
-    String get(String key);
-    void put(String key, String value);
+    DBEntry get(String key);
+    void put(String key, DBEntry value);
 }

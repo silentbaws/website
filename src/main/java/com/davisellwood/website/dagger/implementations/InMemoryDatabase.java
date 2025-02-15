@@ -1,71 +1,80 @@
 package com.davisellwood.website.dagger.implementations;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
-import java.util.Random;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.davisellwood.website.dagger.interfaces.Database;
 import com.davisellwood.website.dagger.interfaces.ObjectStore;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.extern.slf4j.Slf4j;
 import proto.davisellwood.website.cheapskate.CheapSkateDatabase;
 import proto.davisellwood.website.cheapskate.CheapSkateDatabase.Database.DBEntry;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 @Slf4j
 public class InMemoryDatabase implements Database {
-    private static long SAVE_PERIOD = 15 * 1000;
+    private static final long DEFAULT_SAVE_PERIOD_MILLISECONDS = Duration.ofMinutes(60).toMillis();
+    private final long SAVE_PERIOD_MILLISECONDS;
+
+    private static Timer SAVE_TIMER = new Timer();
+    private static Timer LOAD_TIMER = new Timer();
 
     private final ObjectStore objectStore;
 
-    private final ConcurrentHashMap<String, DBEntry> store;
-    private final Timer saveTimer;
-
-    private final Timer loadTimer;
+    private final ConcurrentHashMap<String, DBEntry> database;
     private boolean hasLoadedFromBucket = false;
 
     public InMemoryDatabase(ObjectStore objectStore) {
         log.info("Creating new in memory database");
+
+        if (System.getenv("spring_profiles_active") == "dev") {
+            log.error("SETTING DB SAVE PERIOD TO DEV MODE 1.5 MINUTES");
+            SAVE_PERIOD_MILLISECONDS = Duration.ofSeconds(90).toMillis();
+        } else {
+            SAVE_PERIOD_MILLISECONDS = DEFAULT_SAVE_PERIOD_MILLISECONDS;
+        }
+
         this.objectStore = objectStore;
 
-        store = new ConcurrentHashMap<String, DBEntry>();
+        database = new ConcurrentHashMap<String, DBEntry>();
 
-        this.loadTimer = new Timer();
-        loadTimer.scheduleAtFixedRate(new LoadTask(), 1000 , 15000);
+        // Multiple timers run in dev so cancel any existing ones on startup before trying again
+        SAVE_TIMER.cancel();
+        LOAD_TIMER.cancel();
 
-        saveTimer = new Timer();
-        saveTimer.scheduleAtFixedRate(new SaveTask(), 10 * 1000, SAVE_PERIOD);
+        SAVE_TIMER = new Timer();
+        LOAD_TIMER = new Timer();
+
+        LOAD_TIMER.scheduleAtFixedRate(new LoadTask(), 1000 , 15000);
+        SAVE_TIMER.scheduleAtFixedRate(new SaveTask(), 10 * 1000, SAVE_PERIOD_MILLISECONDS);
     }
 
-    // TODO: remove
-    private static String createRandomString() {
-        int leftLimit = 97; // letter 'a'
-        int rightLimit = 122; // letter 'z'
-        int targetStringLength = 10;
-        Random random = new Random();
-
-        return 
-            random.ints(leftLimit, rightLimit + 1)
-                .limit(targetStringLength)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
+    private static String createObjectKeyFromDate() {
+        ZonedDateTime currentTime = Instant.now().atZone(ZoneOffset.UTC);
+        return String.format("database-backup-%s-%s-%s", currentTime.getYear(), currentTime.getMonthValue(), currentTime.getDayOfMonth());
     }
 
-    
-    // TODO: Save to storage and read from storage for real
     private class SaveTask extends TimerTask {
         @Override
         public void run() {
-            try {
-                
-            } catch (Exception e) {
-                log.error("Error trying to save in memory DB to bucket", e);
+            log.info("Attempting to save database to bucket");
+            if (!hasLoadedFromBucket) {
+                log.warn("Attempting to save database before load");
+                return;
+            }
+
+            String key = createObjectKeyFromDate();
+            boolean success = objectStore.put(key, CheapSkateDatabase.Database.newBuilder().putAllEntries(database).build().toByteArray());
+            if (!success) {
+                log.error("Failed to save database to bucket");
             }
         }
     }
@@ -73,39 +82,66 @@ public class InMemoryDatabase implements Database {
     private class LoadTask extends TimerTask {
         @Override
         public void run() {
-            if (store == null) {
-                log.error("STORE IS NULL");
+            if (database == null) {
+                log.error("Database was null during load");
                 return;
             }
 
             if (hasLoadedFromBucket) {
-                loadTimer.cancel();
+                LOAD_TIMER.cancel();
                 return;
             }
 
-            try {
-                var r = new FileInputStream("databaseBytes1739589145");
-                CheapSkateDatabase.Database db = CheapSkateDatabase.Database.parseFrom(r);
-                store.putAll(db.getEntriesMap());
-                r.close();
+            Optional<List<S3Object>> savedDatabases = objectStore.listObjects();
+            if (savedDatabases.isEmpty() || savedDatabases.get().isEmpty()) {
+                log.error("Error listing database bucket");
+            }
 
-                log.info("loaded db from disk");
-                log.info(store.toString());
-            } catch (FileNotFoundException e) {
-            } catch (IOException e) { }
+            log.debug("Iterating over previously saved databases");
+            S3Object mostRecentDatabaseBackup = null;
+            for (S3Object savedDatabase : savedDatabases.get()) {
+                log.debug("Previous databse {}, last modified {}", savedDatabase.key(), savedDatabase.lastModified().toString());
+
+                if (mostRecentDatabaseBackup == null || mostRecentDatabaseBackup.lastModified().toEpochMilli() < savedDatabase.lastModified().toEpochMilli()) {
+                    log.debug("Updating most recent with current");
+                    mostRecentDatabaseBackup = savedDatabase;
+                }
+            }
+
+            Optional<byte[]> databaseBytes = objectStore.get(mostRecentDatabaseBackup.key());
+            if (databaseBytes.isPresent()) {
+                CheapSkateDatabase.Database dbProto;
+                try {
+                    dbProto = CheapSkateDatabase.Database.parseFrom(databaseBytes.get());
+                    database.putAll(dbProto.getEntriesMap());
+
+                    hasLoadedFromBucket = true;
+
+                    log.info("Successfully loaded database from disk {}", database.toString());
+                } catch (InvalidProtocolBufferException e) {
+                    log.error("Error parsing database from disk: ", e);
+                }
+            } else {
+                log.error("Error loading database from disk");
+            }
         }
     }
 
     @Override
-    public String get(String key) {
-        return "";
+    public DBEntry get(String key) {
+        if (database == null) {
+            return null;
+        }
+
+        return database.get(key);
     }
 
     @Override
-    public void put(String key, String value) {
-        var key2 = createRandomString();
-        var val = createRandomString();
-        log.error(String.format("putting value %s in db with key %s", val, key2));
-        store.put(key2, DBEntry.newBuilder().setStringValue(val).build());
+    public void put(String key, DBEntry value) {
+        if (database == null) {
+            return;
+        }
+
+        database.put(key, value);
     }
 }
