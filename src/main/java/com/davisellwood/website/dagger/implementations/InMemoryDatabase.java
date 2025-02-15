@@ -62,24 +62,11 @@ public class InMemoryDatabase implements Database {
     private class SaveTask extends TimerTask {
         @Override
         public void run() {
-            if (store == null) {
-                log.error("STORE IS NULL");
-                return;
-            }
-            if (!hasLoadedFromBucket) {
-                return;
-            }
-            log.info(store.toString());
-
-            var allData = CheapSkateDatabase.Database.newBuilder().putAllEntries(store).build();
-
-            var f = new File("databaseBytes" + Instant.now().getEpochSecond());
             try {
-                f.createNewFile();
-                var w = new FileOutputStream(f);
-                w.write(allData.toByteArray());
-                w.close();
-            } catch (IOException e) {}
+                
+            } catch (Exception e) {
+                log.error("Error trying to save in memory DB to bucket", e);
+            }
         }
     }
 

@@ -1,6 +1,10 @@
 package com.davisellwood.website.dagger.implementations;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
 
 import com.davisellwood.website.dagger.interfaces.ObjectStore;
 
@@ -8,10 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Slf4j
 public class SpacesObjectStore implements ObjectStore {
@@ -50,11 +56,26 @@ public class SpacesObjectStore implements ObjectStore {
     }
 
     @Override
-    // TODO: Update definition
-    public String get(String key) {
-        var resp = client.getObject(GetObjectRequest.builder().bucket(bucketName).key(key).build());
+    public Optional<byte[]> get(String key) {
+        try {
+            var resp = client.getObject(GetObjectRequest.builder().bucket(bucketName).key(key).build());
+    
+            return Optional.of(resp.readAllBytes());
+        } catch (Exception e) {
+            log.warn("Error trying to read object {} from bucket {}: ", key, bucketName, e);
+            return Optional.empty();
+        }
+    }
 
-        return "";
+    @Override
+    public boolean put(String key, byte[] value) {
+        try {
+            var resp = client.putObject(PutObjectRequest.builder().key(key).bucket(bucketName).build(), RequestBody.fromBytes(value));
+
+            return resp.sdkHttpResponse().statusCode() == HttpStatus.OK.value();
+        } catch (Exception e) {
+            return false;
+        }
     }
     
 }
