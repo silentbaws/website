@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ServerErrorException;
 
+import com.davisellwood.website.common.Database;
+import com.davisellwood.website.common.SpringStorageProvider;
 import com.davisellwood.website.models.ProjectFeature;
 import com.davisellwood.website.models.WorkProject;
 
@@ -19,6 +23,13 @@ import com.davisellwood.website.models.WorkProject;
 @EnableCaching
 public class WorkController {
     public static final String PATH_PREFIX = "work";
+
+    private final Database database;
+
+    @Inject
+    public WorkController(SpringStorageProvider storageProvider) {
+        this.database = storageProvider.database();
+    }
 
     // TODO: Migrate to database storage and retrieval
     private static final Map<String, WorkProject> PROJECTS = Map.of(
@@ -43,6 +54,7 @@ public class WorkController {
         @PathVariable String projectName,
         Model model
     ) {
+        database.put("", "");
         if (!PROJECTS.containsKey(projectName.toLowerCase())) {
             return "error";
         }

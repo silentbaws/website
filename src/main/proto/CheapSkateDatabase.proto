@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package proto.davisellwood.website.cheapskate;
+
+message Database {
+    message DBEntry {
+        oneof entry {
+            string stringValue = 1;
+            sint64 longValue = 2;
+            double decimalValue = 3;
+            bytes byteValue = 4;
+        }
+    }
+
+    map<string, DBEntry> entries = 1;
+}
