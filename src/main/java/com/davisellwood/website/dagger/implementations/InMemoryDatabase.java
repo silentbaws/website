@@ -1,4 +1,4 @@
-package com.davisellwood.website.common;
+package com.davisellwood.website.dagger.implementations;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -6,11 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Date;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.davisellwood.website.dagger.interfaces.Database;
 
 import lombok.extern.slf4j.Slf4j;
 import proto.davisellwood.website.cheapskate.CheapSkateDatabase;
@@ -44,6 +45,9 @@ public class InMemoryDatabase implements Database {
         public void run() {
             if (store == null) {
                 log.error("STORE IS NULL");
+                return;
+            }
+            if (!hasLoadedFromBucket) {
                 return;
             }
             log.info(store.toString());
@@ -89,13 +93,13 @@ public class InMemoryDatabase implements Database {
     public InMemoryDatabase() {
         log.info("Creating new in memory database");
 
+        store = new ConcurrentHashMap<String, DBEntry>();
+
         this.loadTimer = new Timer();
         loadTimer.scheduleAtFixedRate(new LoadTask(), 1000 , 15000);
 
         saveTimer = new Timer();
-        saveTimer.scheduleAtFixedRate(new SaveTask(), Date.from(Instant.now()), SAVE_PERIOD);
-
-        store = new ConcurrentHashMap<String, DBEntry>();
+        saveTimer.scheduleAtFixedRate(new SaveTask(), 10 * 1000, SAVE_PERIOD);
     }
 
     @Override

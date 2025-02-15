@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ServerErrorException;
 
-import com.davisellwood.website.common.Database;
-import com.davisellwood.website.common.SpringStorageProvider;
+import com.davisellwood.website.dagger.interfaces.Database;
+import com.davisellwood.website.dagger.spring.bindings.SpringStorageProvider;
 import com.davisellwood.website.models.ProjectFeature;
 import com.davisellwood.website.models.WorkProject;
 

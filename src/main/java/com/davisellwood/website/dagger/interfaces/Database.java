@@ -1,4 +1,4 @@
-package com.davisellwood.website.common;
+package com.davisellwood.website.dagger.interfaces;
 
 import javax.inject.Singleton;
 
