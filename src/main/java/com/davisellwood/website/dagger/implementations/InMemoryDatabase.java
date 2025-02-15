@@ -18,14 +18,17 @@ import lombok.extern.slf4j.Slf4j;
 import proto.davisellwood.website.cheapskate.CheapSkateDatabase;
 import proto.davisellwood.website.cheapskate.CheapSkateDatabase.Database.DBEntry;
 import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.utils.StringUtils;
 
 @Slf4j
 public class InMemoryDatabase implements Database {
     private static final long DEFAULT_SAVE_PERIOD_MILLISECONDS = Duration.ofMinutes(60).toMillis();
     private final long SAVE_PERIOD_MILLISECONDS;
 
-    private static Timer SAVE_TIMER = new Timer();
-    private static Timer LOAD_TIMER = new Timer();
+    // TODO: Fix these so there isn't multiple scheduled on dev
+    // Probably inject a scheduler or something? idk 
+    private final Timer SAVE_TIMER;
+    private final Timer LOAD_TIMER;
 
     private final ObjectStore objectStore;
 
@@ -35,7 +38,7 @@ public class InMemoryDatabase implements Database {
     public InMemoryDatabase(ObjectStore objectStore) {
         log.info("Creating new in memory database");
 
-        if (System.getenv("spring_profiles_active") == "dev") {
+        if ("dev".equals(StringUtils.trim(System.getenv("spring_profiles_active")))) {
             log.error("SETTING DB SAVE PERIOD TO DEV MODE 1.5 MINUTES");
             SAVE_PERIOD_MILLISECONDS = Duration.ofSeconds(90).toMillis();
         } else {
@@ -45,10 +48,6 @@ public class InMemoryDatabase implements Database {
         this.objectStore = objectStore;
 
         database = new ConcurrentHashMap<String, DBEntry>();
-
-        // Multiple timers run in dev so cancel any existing ones on startup before trying again
-        SAVE_TIMER.cancel();
-        LOAD_TIMER.cancel();
 
         SAVE_TIMER = new Timer();
         LOAD_TIMER = new Timer();

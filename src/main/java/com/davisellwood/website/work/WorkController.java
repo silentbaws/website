@@ -90,6 +90,7 @@ public class WorkController {
         );
     }
 
+    // TODO: Abstract this away and inject the cached project map directly. As I need to use it for homepage
     private void updateProjects() {
         if (Duration.between(lastFetchedProjectsTime, Instant.now()).compareTo(PROJECT_CACHE_DURATION) < 0) {
             return;
