@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package proto.davisellwood.website.models;
+
+message BlogPost {
+    string blogId = 1;
+    string title = 2;
+    string contentFilePath = 3;
+    bool isPublic = 4;
+}
+
+message BlogPostMap {
+    map<string, BlogPost> posts = 1;
+}

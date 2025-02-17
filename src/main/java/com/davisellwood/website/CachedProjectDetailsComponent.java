@@ -31,6 +31,7 @@ public class CachedProjectDetailsComponent {
 
     public CachedProjectDetailsComponent(SpringStorageProvider storageProvider) {
         database = storageProvider.database();
+        projects = Map.of();
     }
 
     private void updateProjects() {

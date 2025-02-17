@@ -36,7 +36,7 @@ public class InMemoryDatabase implements Database {
         database = new ConcurrentHashMap<String, DBEntry>();
 
         LOAD_TIMER = new Timer();
-        LOAD_TIMER.scheduleAtFixedRate(new LoadTask(), 1000 , 15000);
+        LOAD_TIMER.scheduleAtFixedRate(new LoadTask(), 1000 , 5000);
     }
 
     private static String createObjectKeyFromDate() {
