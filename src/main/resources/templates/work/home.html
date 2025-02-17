@@ -31,16 +31,17 @@
             <ol class="carousel-indicators">
               <li data-bs-target="#workCarousel" data-bs-slide-to="0" class="active"></li>
             </ol>
-            <!--TODO: Add backend connection to get these images and create carousel with th:each-->
             <div class="carousel-inner" role="listbox">
+              <th:block th:each="project: ${projects}">
               <div class="carousel-item active" data-bs-interval="2000">
-                <a href="/work/skaterxl">
-                  <img class="d-block w-100" th:src="@{/images/work/sxlmultiplayer.jpg}" alt="SkaterXL Multiplayer Mod">
+                <a th:href="@{/work/{pathId}(pathId=${project.pathId})}">
+                  <img class="d-block w-100" th:src="${project.previewImageURI}" alt="">
                   <div class="carousel-caption d-none d-md-block">
-                    <h5>SkaterXL Mutliplayer Mod</h5>
+                    <h5 th:text="${project.name}"></h5>
                   </div>
                 </a>
               </div>
+              </th:block>
             </div>
             <a class="carousel-control-prev" href="#" data-bs-target="#workCarousel" type="button" data-bs-slide="prev">
               <span class="carousel-control-prev-icon" aria-hidden="true"></span>

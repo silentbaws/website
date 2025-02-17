@@ -27,8 +27,7 @@
                 <div class="dropdown-menu dropdown-menu-right">
                   <a class="dropdown-item" href="/work">All Work</a>
                   <div class="dropdown-divider"></div>
-                  <!--TODO: Add backend connection to get these urls-->
-                  <a class="dropdown-item" href="/work/skaterxl">SkaterXL Multiplayer Mod</a>
+                  <a class="dropdown-item" th:each="project: ${projects}" th:text="${project.name}" th:href="@{/work/{id}(id=${project.pathId})}"></a>
                 </div>
               </li>
               <li class="nav-item">

@@ -1,6 +1,5 @@
 package com.davisellwood.website.dagger.implementations;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -18,16 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import proto.davisellwood.website.cheapskate.CheapSkateDatabase;
 import proto.davisellwood.website.cheapskate.CheapSkateDatabase.Database.DBEntry;
 import software.amazon.awssdk.services.s3.model.S3Object;
-import software.amazon.awssdk.utils.StringUtils;
 
 @Slf4j
 public class InMemoryDatabase implements Database {
-    private static final long DEFAULT_SAVE_PERIOD_MILLISECONDS = Duration.ofMinutes(60).toMillis();
-    private final long SAVE_PERIOD_MILLISECONDS;
 
-    // TODO: Fix these so there isn't multiple scheduled on dev
-    // Probably inject a scheduler or something? idk 
-    private final Timer SAVE_TIMER;
     private final Timer LOAD_TIMER;
 
     private final ObjectStore objectStore;
@@ -38,22 +31,12 @@ public class InMemoryDatabase implements Database {
     public InMemoryDatabase(ObjectStore objectStore) {
         log.info("Creating new in memory database");
 
-        if ("dev".equals(StringUtils.trim(System.getenv("spring_profiles_active")))) {
-            log.error("SETTING DB SAVE PERIOD TO DEV MODE 1.5 MINUTES");
-            SAVE_PERIOD_MILLISECONDS = Duration.ofSeconds(90).toMillis();
-        } else {
-            SAVE_PERIOD_MILLISECONDS = DEFAULT_SAVE_PERIOD_MILLISECONDS;
-        }
-
         this.objectStore = objectStore;
 
         database = new ConcurrentHashMap<String, DBEntry>();
 
-        SAVE_TIMER = new Timer();
         LOAD_TIMER = new Timer();
-
         LOAD_TIMER.scheduleAtFixedRate(new LoadTask(), 1000 , 15000);
-        SAVE_TIMER.scheduleAtFixedRate(new SaveTask(), 10 * 1000, SAVE_PERIOD_MILLISECONDS);
     }
 
     private static String createObjectKeyFromDate() {
@@ -61,20 +44,17 @@ public class InMemoryDatabase implements Database {
         return String.format("database-backup-%s-%s-%s", currentTime.getYear(), currentTime.getMonthValue(), currentTime.getDayOfMonth());
     }
 
-    private class SaveTask extends TimerTask {
-        @Override
-        public void run() {
-            log.info("Attempting to save database to bucket");
-            if (!hasLoadedFromBucket) {
-                log.warn("Attempting to save database before load");
-                return;
-            }
+    private void save() {
+        log.info("Attempting to save database to bucket");
+        if (!hasLoadedFromBucket) {
+            log.warn("Attempting to save database before load");
+            return;
+        }
 
-            String key = createObjectKeyFromDate();
-            boolean success = objectStore.put(key, CheapSkateDatabase.Database.newBuilder().putAllEntries(database).build().toByteArray());
-            if (!success) {
-                log.error("Failed to save database to bucket");
-            }
+        String key = createObjectKeyFromDate();
+        boolean success = objectStore.put(key, CheapSkateDatabase.Database.newBuilder().putAllEntries(database).build().toByteArray());
+        if (!success) {
+            log.error("Failed to save database to bucket");
         }
     }
 
@@ -142,5 +122,6 @@ public class InMemoryDatabase implements Database {
         }
 
         database.put(key, value);
+        save();
     }
 }

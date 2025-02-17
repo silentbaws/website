@@ -12,4 +12,6 @@ message ProgrammingProject {
     string description = 2;
     repeated string technologies = 3;
     repeated ProjectFeature features = 4;
+    string pathId = 5; // This should be the same as the db ID, minus the prefix
+    string previewImageURI = 6;
 }

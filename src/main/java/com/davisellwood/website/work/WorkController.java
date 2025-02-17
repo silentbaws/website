@@ -1,13 +1,7 @@
 package com.davisellwood.website.work;
 
-import java.lang.reflect.Field;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -17,15 +11,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.server.ServerErrorException;
 
-import com.davisellwood.website.dagger.interfaces.Database;
+import com.davisellwood.website.CachedProjectDetailsComponent;
 import com.davisellwood.website.dagger.interfaces.ObjectStore;
 import com.davisellwood.website.dagger.spring.bindings.SpringStorageProvider;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.extern.slf4j.Slf4j;
-import proto.davisellwood.website.cheapskate.CheapSkateDatabase.Database.DBEntry;
 import proto.davisellwood.website.models.ProgrammingProjectOuterClass.ProgrammingProject;
 
 @Controller
@@ -34,23 +25,13 @@ import proto.davisellwood.website.models.ProgrammingProjectOuterClass.Programmin
 public class WorkController {
     public static final String PATH_PREFIX = "work";
 
-    private static final Duration PROJECT_CACHE_DURATION = Duration.ofMinutes(5);
-
-    private static final String PROJECT_KEYS_ENTRY_KEY = "project-keys";
-    private static final String PROJECT_KEY_PREFIX = "project-details-";
-
-    private final Database database;
     private final ObjectStore objectStore;
-
-    private Map<String, ProgrammingProject> projects;
-    private Instant lastFetchedProjectsTime = Instant.ofEpochMilli(0);
+    private final CachedProjectDetailsComponent projectDetailsComponent;
 
     @Inject
-    public WorkController(SpringStorageProvider storageProvider) {
-        this.database = storageProvider.database();
+    public WorkController(SpringStorageProvider storageProvider, CachedProjectDetailsComponent projectDetailsComponent) {
+        this.projectDetailsComponent = projectDetailsComponent;
         this.objectStore = storageProvider.objectStore();
-
-        projects = new HashMap<>();
     }
 
     @GetMapping(PATH_PREFIX)
@@ -63,22 +44,17 @@ public class WorkController {
         @PathVariable String pathProjectKey,
         Model model
     ) {
-        String projectKey = PROJECT_KEY_PREFIX + pathProjectKey.toLowerCase();
-        updateProjects();
-
-        if (!projects.containsKey(projectKey)) {
+        Optional<ProgrammingProject> project = projectDetailsComponent.getProjectFromPathId(pathProjectKey);
+        
+        if (project.isEmpty()) {
             return "error";
         }
-        try {
-            model.addAllAttributes(toThymeMap(projects.get(projectKey)));
-        } catch (Exception e) {
-            throw new ServerErrorException("server error", e);
-        }
 
+        model.addAllAttributes(toThymeMap(project.get()));
         return PATH_PREFIX + "/project";
     }
     
-    public Map<String, Object> toThymeMap(ProgrammingProject project) throws Exception {
+    public Map<String, Object> toThymeMap(ProgrammingProject project) {
         return Map.of(
             "name", project.getName(),
             "description", project.getDescription(),
@@ -88,30 +64,5 @@ public class WorkController {
                 "description", feature.getDescription()
             )).collect(Collectors.toList())
         );
-    }
-
-    // TODO: Abstract this away and inject the cached project map directly. As I need to use it for homepage
-    private void updateProjects() {
-        if (Duration.between(lastFetchedProjectsTime, Instant.now()).compareTo(PROJECT_CACHE_DURATION) < 0) {
-            return;
-        }
-        log.info("Project cache expired, attempting to fetch new values");
-
-        Map<String, ProgrammingProject> newMap = new HashMap<>();
-        DBEntry projectKeys = database.get(PROJECT_KEYS_ENTRY_KEY);
-        if (projectKeys == null) {
-            return;
-        }
-
-        for (String key : projectKeys.getStringListValue().getStringValueList()) {
-            try {
-                newMap.put(key, ProgrammingProject.parseFrom(database.get(key).getByteValue()));
-            } catch (InvalidProtocolBufferException e) {
-                log.error("Parsing error getting project details: ", e);
-            }
-        }
-
-        lastFetchedProjectsTime = Instant.now();
-        projects = newMap;
     }
 }

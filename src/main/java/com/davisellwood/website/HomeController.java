@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
     @GetMapping("/")
     public String home(Model model) {
-        // TODO: update homepage to use dynamic work links
         return "home";
     }
 }
