@@ -71,15 +71,24 @@ public class SpacesObjectStore implements ObjectStore {
         }
     }
 
-    @Override
-    public boolean put(String key, byte[] value) {
+    private boolean put(String key, byte[] value, boolean isPublic) {
         try {
-            var resp = client.putObject(PutObjectRequest.builder().key(key).bucket(bucketName).build(), RequestBody.fromBytes(value));
+            var resp = client.putObject(PutObjectRequest.builder().key(key).acl(isPublic ? "public-read" : "private").bucket(bucketName).build(), RequestBody.fromBytes(value));
 
             return resp.sdkHttpResponse().statusCode() == HttpStatus.OK.value();
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Override
+    public boolean put(String key, byte[] value) {
+        return put(key, value, false);
+    }
+
+    @Override
+    public boolean putPublic(String key, byte[] value) {
+        return put(key, value, true);
     }
 
     @Override
