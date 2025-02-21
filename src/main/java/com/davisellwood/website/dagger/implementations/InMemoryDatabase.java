@@ -20,8 +20,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 @Slf4j
 public class InMemoryDatabase implements Database {
 
-    private final Timer LOAD_TIMER;
-
+    private final Timer loadTimer;
     private final ObjectStore objectStore;
 
     private final ConcurrentHashMap<String, DBEntry> database;
@@ -32,15 +31,15 @@ public class InMemoryDatabase implements Database {
 
         this.objectStore = objectStore;
 
-        database = new ConcurrentHashMap<String, DBEntry>();
+        database = new ConcurrentHashMap<>();
 
-        LOAD_TIMER = new Timer();
-        LOAD_TIMER.scheduleAtFixedRate(new LoadTask(), 1000, 5000);
+        loadTimer = new Timer();
+        loadTimer.scheduleAtFixedRate(new LoadTask(), 1000, 5000);
     }
 
     private static String createObjectKeyFromDate() {
         ZonedDateTime currentTime = Instant.now().atZone(ZoneOffset.UTC);
-        return String.format("database-backup-%s-%s-%s", currentTime.getYear(), currentTime.getMonthValue(),
+        return "database-backup-%s-%s-%s".formatted(currentTime.getYear(), currentTime.getMonthValue(),
                 currentTime.getDayOfMonth());
     }
 
@@ -68,7 +67,7 @@ public class InMemoryDatabase implements Database {
             }
 
             if (hasLoadedFromBucket) {
-                LOAD_TIMER.cancel();
+                loadTimer.cancel();
                 return;
             }
 

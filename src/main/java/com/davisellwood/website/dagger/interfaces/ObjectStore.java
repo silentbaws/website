@@ -1,8 +1,8 @@
 package com.davisellwood.website.dagger.interfaces;
 
+import jakarta.inject.Singleton;
 import java.util.List;
 import java.util.Optional;
-import javax.inject.Singleton;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 @Singleton

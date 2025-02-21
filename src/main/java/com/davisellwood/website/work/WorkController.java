@@ -1,12 +1,10 @@
 package com.davisellwood.website.work;
 
 import com.davisellwood.website.CachedProjectDetailsComponent;
-import com.davisellwood.website.dagger.interfaces.ObjectStore;
 import com.davisellwood.website.dagger.spring.bindings.SpringStorageProvider;
+import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Controller;
@@ -21,14 +19,12 @@ import proto.davisellwood.website.models.ProgrammingProjectOuterClass.Programmin
 public class WorkController {
     public static final String PATH_PREFIX = "work";
 
-    private final ObjectStore objectStore;
     private final CachedProjectDetailsComponent projectDetailsComponent;
 
     @Inject
     public WorkController(SpringStorageProvider storageProvider,
             CachedProjectDetailsComponent projectDetailsComponent) {
         this.projectDetailsComponent = projectDetailsComponent;
-        this.objectStore = storageProvider.objectStore();
     }
 
     @GetMapping(PATH_PREFIX)
@@ -57,6 +53,6 @@ public class WorkController {
                 "technologies", project.getTechnologiesList(),
                 "features", project.getFeaturesList().stream().map(feature -> Map.of(
                         "name", feature.getName(),
-                        "description", feature.getDescription())).collect(Collectors.toList()));
+                        "description", feature.getDescription())).toList());
     }
 }

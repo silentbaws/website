@@ -2,7 +2,6 @@ package com.davisellwood.website;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -29,6 +28,6 @@ public class ProjectDirectoryAdvice {
         return Map.of("projects", projects.stream().map(project -> Map.of(
                 "name", project.getName(),
                 "pathId", project.getPathId(),
-                "previewImageURI", project.getPreviewImageURI())).collect(Collectors.toList()));
+                "previewImageURI", project.getPreviewImageURI())).toList());
     }
 }
