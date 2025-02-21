@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Module
 @Slf4j
 public class StorageModule {
+    // TODO: Add dev resources for both of these as I don't want to accidentally corrupt livemode data
     @Provides
     @Singleton
     @Named("db-store")

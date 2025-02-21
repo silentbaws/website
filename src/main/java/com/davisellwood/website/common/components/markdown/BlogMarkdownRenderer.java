@@ -36,6 +36,7 @@ public class BlogMarkdownRenderer {
                 .build();
     }
 
+    // TODO: Caching?
     public String renderMarkdown(String blogId, String markdown) {
         Parser markdownParser = parserBuilder.linkProcessor(new CustomLinkProcessor(blogId)).build();
         Node document = markdownParser.parse(markdown);

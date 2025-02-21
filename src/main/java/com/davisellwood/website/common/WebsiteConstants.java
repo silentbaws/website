@@ -3,6 +3,8 @@ package com.davisellwood.website.common;
 public class WebsiteConstants {
     private WebsiteConstants() {}
 
+    public static final String ERROR_404_PAGE = "error";
+
     public static class Blog {
         private Blog() {}
 
