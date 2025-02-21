@@ -1,14 +1,11 @@
 package com.davisellwood.website.dagger.implementations;
 
+import com.davisellwood.website.dagger.interfaces.ObjectStore;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
-
-import org.springframework.http.HttpStatus;
-
-import com.davisellwood.website.dagger.interfaces.ObjectStore;
-
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
@@ -38,32 +35,31 @@ public class SpacesObjectStore implements ObjectStore {
         }
     }
 
-
-    public SpacesObjectStore (String bucketKeyId, String bucketKey, String bucketName) {
+    public SpacesObjectStore(String bucketKeyId, String bucketKey, String bucketName) {
         log.info("Creating S3 Client for bucket {}", bucketName);
 
         this.bucketKey = bucketKey;
         this.bucketKeyId = bucketKeyId;
         this.bucketName = bucketName;
 
-        client = 
-            S3Client.builder()
+        client = S3Client.builder()
                 .forcePathStyle(false)
                 .endpointOverride(URI.create("https://nyc3.digitaloceanspaces.com"))
                 .region(Region.US_EAST_1).credentialsProvider(new SpacesCredentialProvider())
                 .httpClient(
-                    ApacheHttpClient.builder()
-                        .maxConnections(20)
-                        .build())
+                        ApacheHttpClient.builder()
+                                .maxConnections(20)
+                                .build())
                 .build();
     }
 
-    // TODO: Probably update Optional response to Either<Error, Response> and log from the caller
+    // TODO: Probably update Optional response to Either<Error, Response> and log
+    // from the caller
     @Override
     public Optional<byte[]> get(String key) {
         try {
             var resp = client.getObject(GetObjectRequest.builder().bucket(bucketName).key(key).build());
-    
+
             return Optional.of(resp.readAllBytes());
         } catch (Exception e) {
             log.warn("Error trying to read object {} from bucket {}: ", key, bucketName, e);
@@ -73,7 +69,8 @@ public class SpacesObjectStore implements ObjectStore {
 
     private boolean put(String key, byte[] value, boolean isPublic) {
         try {
-            var resp = client.putObject(PutObjectRequest.builder().key(key).acl(isPublic ? "public-read" : "private").bucket(bucketName).build(), RequestBody.fromBytes(value));
+            var resp = client.putObject(PutObjectRequest.builder().key(key).acl(isPublic ? "public-read" : "private")
+                    .bucket(bucketName).build(), RequestBody.fromBytes(value));
 
             return resp.sdkHttpResponse().statusCode() == HttpStatus.OK.value();
         } catch (Exception e) {
@@ -101,5 +98,5 @@ public class SpacesObjectStore implements ObjectStore {
             return Optional.empty();
         }
     }
-    
+
 }

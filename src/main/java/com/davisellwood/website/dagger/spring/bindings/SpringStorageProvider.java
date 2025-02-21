@@ -1,11 +1,10 @@
 package com.davisellwood.website.dagger.spring.bindings;
 
-import org.springframework.stereotype.Component;
-
 import com.davisellwood.website.dagger.DaggerStorageComponent;
 import com.davisellwood.website.dagger.StorageComponent;
 import com.davisellwood.website.dagger.interfaces.Database;
 import com.davisellwood.website.dagger.interfaces.ObjectStore;
+import org.springframework.stereotype.Component;
 
 @Component
 public class SpringStorageProvider {

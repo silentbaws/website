@@ -1,5 +1,8 @@
 package com.davisellwood.website.dagger.implementations;
 
+import com.davisellwood.website.dagger.interfaces.Database;
+import com.davisellwood.website.dagger.interfaces.ObjectStore;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -8,11 +11,6 @@ import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.davisellwood.website.dagger.interfaces.Database;
-import com.davisellwood.website.dagger.interfaces.ObjectStore;
-import com.google.protobuf.InvalidProtocolBufferException;
-
 import lombok.extern.slf4j.Slf4j;
 import proto.davisellwood.website.cheapskate.CheapSkateDatabase;
 import proto.davisellwood.website.cheapskate.CheapSkateDatabase.Database.DBEntry;
@@ -37,12 +35,13 @@ public class InMemoryDatabase implements Database {
         database = new ConcurrentHashMap<String, DBEntry>();
 
         LOAD_TIMER = new Timer();
-        LOAD_TIMER.scheduleAtFixedRate(new LoadTask(), 1000 , 5000);
+        LOAD_TIMER.scheduleAtFixedRate(new LoadTask(), 1000, 5000);
     }
 
     private static String createObjectKeyFromDate() {
         ZonedDateTime currentTime = Instant.now().atZone(ZoneOffset.UTC);
-        return String.format("database-backup-%s-%s-%s", currentTime.getYear(), currentTime.getMonthValue(), currentTime.getDayOfMonth());
+        return String.format("database-backup-%s-%s-%s", currentTime.getYear(), currentTime.getMonthValue(),
+                currentTime.getDayOfMonth());
     }
 
     private void save() {
@@ -53,7 +52,8 @@ public class InMemoryDatabase implements Database {
         }
 
         String key = createObjectKeyFromDate();
-        boolean success = objectStore.put(key, CheapSkateDatabase.Database.newBuilder().putAllEntries(database).build().toByteArray());
+        boolean success = objectStore.put(key,
+                CheapSkateDatabase.Database.newBuilder().putAllEntries(database).build().toByteArray());
         if (!success) {
             log.error("Failed to save database to bucket");
         }
@@ -80,9 +80,11 @@ public class InMemoryDatabase implements Database {
             log.debug("Iterating over previously saved databases");
             S3Object mostRecentDatabaseBackup = null;
             for (S3Object savedDatabase : savedDatabases.get()) {
-                log.debug("Previous databse {}, last modified {}", savedDatabase.key(), savedDatabase.lastModified().toString());
+                log.debug("Previous databse {}, last modified {}", savedDatabase.key(),
+                        savedDatabase.lastModified().toString());
 
-                if (mostRecentDatabaseBackup == null || mostRecentDatabaseBackup.lastModified().toEpochMilli() < savedDatabase.lastModified().toEpochMilli()) {
+                if (mostRecentDatabaseBackup == null || mostRecentDatabaseBackup.lastModified()
+                        .toEpochMilli() < savedDatabase.lastModified().toEpochMilli()) {
                     log.debug("Updating most recent with current");
                     mostRecentDatabaseBackup = savedDatabase;
                 }

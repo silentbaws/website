@@ -1,16 +1,14 @@
 package com.davisellwood.website.dagger;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-
 import com.davisellwood.website.dagger.implementations.InMemoryDatabase;
 import com.davisellwood.website.dagger.implementations.SpacesObjectStore;
 import com.davisellwood.website.dagger.interfaces.Database;
 import com.davisellwood.website.dagger.interfaces.ObjectStore;
-
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
 @Module

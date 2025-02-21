@@ -1,19 +1,16 @@
 package com.davisellwood.website;
 
+import com.davisellwood.website.dagger.interfaces.Database;
+import com.davisellwood.website.dagger.spring.bindings.SpringStorageProvider;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import org.springframework.stereotype.Component;
-
-import com.davisellwood.website.dagger.interfaces.Database;
-import com.davisellwood.website.dagger.spring.bindings.SpringStorageProvider;
-import com.google.protobuf.InvalidProtocolBufferException;
-
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import proto.davisellwood.website.cheapskate.CheapSkateDatabase.Database.DBEntry;
 import proto.davisellwood.website.models.ProgrammingProjectOuterClass.ProgrammingProject;
 
@@ -23,7 +20,7 @@ public class CachedProjectDetailsComponent {
     private static final Duration PROJECT_CACHE_DURATION = Duration.ofMinutes(5);
     private static final String PROJECT_KEYS_ENTRY_KEY = "project-keys";
     private static final String PROJECT_KEY_PREFIX = "project-details-";
-    
+
     private Instant lastFetchedProjectsTime = Instant.ofEpochMilli(0);
 
     private final Database database;
