@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title th:text="'Davis | ' + ${title}"></title>
+  <meta name="description" th:content="${pageDescription}">
+  <!--/*/ <th:block th:insert="~{fragments/main.html :: headerfiles}"> </th:block> /*/-->
+</head>
+
+<body>
+  <header th:replace="~{fragments/main.html :: header}"></header>
+  <div class="container mb-5">
+    <div class="row">
+        <div class="col-12 text-center pb-5">
+            <h1 th:text="${title}"></h1>
+            <span style="width: 100%; display: flex; justify-content: space-between;" class="lead">
+              <span><strong>Published: </strong><span th:text="${publishDate}"></span></span>
+              <span><strong>Last Edited: </strong><span th:text="${lastUpdatedDate}"></span></span>
+            </span>
+        </div>
+        <hr>
+        <div class="col-12 pb-5">
+            <div th:remove="tag" th:utext="${content}"></div>
+        </div>
+    </div>
+  </div>
+  <footer>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script>
+        document.querySelectorAll('code').forEach(el => {
+        // then highlight each
+        hljs.highlightElement(el);
+        });
+    </script>
+    <!--/*/ <th:block th:insert="~{fragments/main.html :: footer}"> </th:block> /*/-->
+  </footer>
+</body>
+
+</html>

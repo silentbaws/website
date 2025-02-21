@@ -18,6 +18,7 @@ import proto.davisellwood.website.cheapskate.CheapSkateDatabase;
 import proto.davisellwood.website.cheapskate.CheapSkateDatabase.Database.DBEntry;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
+// TODO: Replace with SQLite or something I think this is insane
 @Slf4j
 public class InMemoryDatabase implements Database {
 

@@ -30,3 +30,7 @@
   text-align: center;
   font-size: calc(32pt + 1.2vw);
 }
+
+* {
+  scroll-margin-top: calc(60px + 1em);
+}
