@@ -1,4 +1,4 @@
-package com.davisellwood.website.blog;
+package com.davisellwood.website.views.blog;
 
 import com.davisellwood.website.dagger.interfaces.Database;
 import com.davisellwood.website.dagger.interfaces.ObjectStore;

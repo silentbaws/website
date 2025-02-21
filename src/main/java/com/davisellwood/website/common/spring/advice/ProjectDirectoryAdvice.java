@@ -1,5 +1,6 @@
-package com.davisellwood.website;
+package com.davisellwood.website.common.spring.advice;
 
+import com.davisellwood.website.common.spring.components.CachedProjectDetailsComponent;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -8,9 +9,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import proto.davisellwood.website.models.ProgrammingProjectOuterClass.ProgrammingProject;
 
-// TODO: apply to only web pages with ("com.davisellwood.website.webviews")
-// TODO: Requires refactor of folder structure
-@ControllerAdvice
+@ControllerAdvice("com.davisellwood.website.views")
 @Slf4j
 public class ProjectDirectoryAdvice {
     private final CachedProjectDetailsComponent projectDetailsComponent;

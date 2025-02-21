@@ -1,4 +1,4 @@
-package com.davisellwood.website;
+package com.davisellwood.website.common.spring.components;
 
 import com.davisellwood.website.dagger.interfaces.Database;
 import com.davisellwood.website.dagger.spring.bindings.SpringStorageProvider;

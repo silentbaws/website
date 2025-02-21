@@ -1,4 +1,4 @@
-package com.davisellwood.website;
+package com.davisellwood.website.views;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.boot.web.servlet.error.ErrorController;

@@ -233,18 +233,18 @@
 				<artifactId>ph-csscompress-maven-plugin</artifactId>
 				<version>7.0.3</version>
 				<executions>
-				<execution>
-					<goals>
-					<goal>csscompress</goal>
-					</goals>
-				</execution>
+					<execution>
+						<goals>
+						<goal>csscompress</goal>
+						</goals>
+					</execution>
 				</executions>
 				<configuration>
-				<forceCompress>false</forceCompress>
-				<removeUnnecessaryCode>true</removeUnnecessaryCode>
-				<quoteURLs>true</quoteURLs>
-				<verbose>true</verbose>
-				<sourceDirectory>${basedir}/src/main/resources/static/styles</sourceDirectory>
+					<forceCompress>true</forceCompress>
+					<removeUnnecessaryCode>true</removeUnnecessaryCode>
+					<quoteURLs>true</quoteURLs>
+					<verbose>true</verbose>
+					<sourceDirectory>${basedir}/src/main/resources/static/styles</sourceDirectory>
 				</configuration>
 			</plugin>
 			<plugin>

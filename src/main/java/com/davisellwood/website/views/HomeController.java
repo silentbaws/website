@@ -1,4 +1,4 @@
-package com.davisellwood.website;
+package com.davisellwood.website.views;
 
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Controller;
