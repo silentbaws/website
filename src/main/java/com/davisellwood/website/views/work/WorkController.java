@@ -1,6 +1,6 @@
 package com.davisellwood.website.views.work;
 
-import com.davisellwood.website.common.spring.components.CachedProjectDetailsComponent;
+import com.davisellwood.website.common.components.CachedProjectDetailsComponent;
 import com.davisellwood.website.dagger.spring.bindings.SpringStorageProvider;
 import jakarta.inject.Inject;
 import java.util.Map;

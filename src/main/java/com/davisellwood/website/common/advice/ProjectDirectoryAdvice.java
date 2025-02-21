@@ -1,6 +1,6 @@
-package com.davisellwood.website.common.spring.advice;
+package com.davisellwood.website.common.advice;
 
-import com.davisellwood.website.common.spring.components.CachedProjectDetailsComponent;
+import com.davisellwood.website.common.components.CachedProjectDetailsComponent;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
