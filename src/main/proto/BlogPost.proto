@@ -12,7 +12,3 @@ message BlogPost {
     google.protobuf.Timestamp publishDate = 5;
     google.protobuf.Timestamp lastEdited = 6;
 }
-
-message BlogPostMap {
-    map<string, BlogPost> posts = 1;
-}

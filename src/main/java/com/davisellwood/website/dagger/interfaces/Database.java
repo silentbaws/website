@@ -1,11 +1,17 @@
 package com.davisellwood.website.dagger.interfaces;
 
+import com.google.protobuf.GeneratedMessage;
+import java.util.List;
 import javax.inject.Singleton;
-import proto.davisellwood.website.cheapskate.CheapSkateDatabase.Database.DBEntry;
 
 @Singleton
 public interface Database {
-    DBEntry get(String key);
+    <T extends GeneratedMessage> T get(Class<T> clazz, String collectionName, String keyName, String keyValue);
+    
+    <T extends GeneratedMessage> List<T> getAll(Class<T> clazz, String collectionName);
 
-    void put(String key, DBEntry value);
+    // TODO: Add return type that indicates success/failure
+    void put(String collectionName, GeneratedMessage value);
+
+    void update(String collectionName, String keyName, String keyValue, GeneratedMessage value);
 }

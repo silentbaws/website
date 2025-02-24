@@ -90,6 +90,16 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>4.29.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java-util</artifactId>
+			<version>4.29.3</version>
+		</dependency>
+		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-protobuf</artifactId>
 			<version>1.70.0</version>
@@ -104,6 +114,22 @@
 			<artifactId>annotations-api</artifactId>
 			<version>6.0.53</version>
 			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongodb-driver-core</artifactId>
+			<version>5.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongodb-driver-sync</artifactId>
+			<version>5.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>bson</artifactId>
+			<version>5.3.1</version>
 		</dependency>
 
 		<dependency>
@@ -198,7 +224,7 @@
 				<artifactId>protobuf-maven-plugin</artifactId>
 				<version>0.6.1</version>
 				<configuration>
-					<protocArtifact>com.google.protobuf:protoc:3.25.5:exe:${os.detected.classifier}</protocArtifact>
+					<protocArtifact>com.google.protobuf:protoc:4.29.3:exe:${os.detected.classifier}</protocArtifact>
 					<pluginId>grpc-java</pluginId>
 					<pluginArtifact>io.grpc:protoc-gen-grpc-java:1.70.0:exe:${os.detected.classifier}</pluginArtifact>
 				</configuration>

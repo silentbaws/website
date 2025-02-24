@@ -2,7 +2,6 @@ package com.davisellwood.website.common.components;
 
 import com.davisellwood.website.dagger.interfaces.Database;
 import com.davisellwood.website.dagger.spring.bindings.SpringStorageProvider;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -11,24 +10,22 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import proto.davisellwood.website.cheapskate.CheapSkateDatabase.Database.DBEntry;
 import proto.davisellwood.website.models.ProgrammingProjectOuterClass.ProgrammingProject;
 
 @Component
 @Slf4j
 public class CachedProjectDetailsComponent {
     private static final Duration PROJECT_CACHE_DURATION = Duration.ofMinutes(5);
-    private static final String PROJECT_KEYS_ENTRY_KEY = "project-keys";
-    private static final String PROJECT_KEY_PREFIX = "project-details-";
 
     private Instant lastFetchedProjectsTime = Instant.ofEpochMilli(0);
 
     private final Database database;
-    private Map<String, ProgrammingProject> projects;
+    private Map<String, ProgrammingProject> projectsCache;
 
     public CachedProjectDetailsComponent(SpringStorageProvider storageProvider) {
         database = storageProvider.database();
-        projects = Map.of();
+
+        projectsCache = Map.of();
     }
 
     private void updateProjects() {
@@ -38,36 +35,25 @@ public class CachedProjectDetailsComponent {
         log.info("Project cache expired, attempting to fetch new values");
 
         Map<String, ProgrammingProject> newMap = new HashMap<>();
-        DBEntry projectKeys = database.get(PROJECT_KEYS_ENTRY_KEY);
-        if (projectKeys == null) {
-            return;
-        }
+        List<ProgrammingProject> projects = database.getAll(ProgrammingProject.class, "projects");
 
-        for (String key : projectKeys.getStringListValue().getStringValueList()) {
-            try {
-                newMap.put(key, ProgrammingProject.parseFrom(database.get(key).getByteValue()));
-            } catch (InvalidProtocolBufferException e) {
-                log.error("Parsing error getting project details: ", e);
-            }
+        for (ProgrammingProject project : projects) {
+            newMap.put(project.getPathId(), project);
         }
 
         lastFetchedProjectsTime = Instant.now();
-        projects = newMap;
+        projectsCache = newMap;
     }
 
     public List<ProgrammingProject> getAllProjects() {
         updateProjects();
-        return projects.values().stream().toList();
+        return projectsCache.values().stream().toList();
     }
 
     public Optional<ProgrammingProject> getProjectFromPathId(String pathId) {
         updateProjects();
-        String projectKey = PROJECT_KEY_PREFIX + pathId.toLowerCase();
+        String projectKey = pathId.toLowerCase();
 
-        if (!projects.containsKey(projectKey)) {
-            return Optional.empty();
-        }
-
-        return Optional.of(projects.get(projectKey));
+        return Optional.ofNullable(projectsCache.get(projectKey));
     }
 }

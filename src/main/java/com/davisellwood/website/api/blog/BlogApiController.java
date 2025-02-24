@@ -1,8 +1,8 @@
 package com.davisellwood.website.api.blog;
 
-import static com.davisellwood.website.common.WebsiteConstants.Blog.BLOG_POSTS_API_KEY;
-import static com.davisellwood.website.common.WebsiteConstants.Blog.BLOG_POSTS_DB_KEY;
+
 import static com.davisellwood.website.common.WebsiteConstants.Blog.BLOG_POSTS_FOLDER;
+import static com.davisellwood.website.common.WebsiteConstants.Blog.DB_COLLECTION_NAME;
 import static com.davisellwood.website.common.WebsiteConstants.Blog.PATH_PREFIX;
 
 import com.davisellwood.website.common.components.markdown.BlogMarkdownRenderer;
@@ -13,7 +13,7 @@ import com.google.protobuf.Timestamp;
 import jakarta.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Map;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -22,9 +22,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import proto.davisellwood.website.cheapskate.CheapSkateDatabase.Database.DBEntry;
+import proto.davisellwood.website.models.APIKeyOuterClass.APIKey;
 import proto.davisellwood.website.models.BlogPostOuterClass.BlogPost;
-import proto.davisellwood.website.models.BlogPostOuterClass.BlogPostMap;
 
 @Controller
 @Slf4j
@@ -38,38 +37,33 @@ public class BlogApiController {
         this.database = storageProvider.database();
     }
 
-    @PostMapping(PATH_PREFIX + "/new")
-    public ResponseEntity<String> postNewBlogImage(
+    // TODO: Include username in request and get apikey for the username
+    @PostMapping(PATH_PREFIX + "/upload")
+    public ResponseEntity<String> uploadBlog(
             @RequestBody String body,
             @RequestHeader("api_key") String apiKey,
             @RequestHeader("is_public") String isPublicString,
             @RequestHeader("blog_id") String blogId,
             @RequestHeader("blog_title") String blogTitle) {
-        if (!BCrypt.checkpw(apiKey, database.get(BLOG_POSTS_API_KEY).getStringValue())) {
+        List<APIKey> apiKeys = database.getAll(APIKey.class, "api_keys");
+        if (apiKeys.isEmpty() || !BCrypt.checkpw(apiKey, apiKeys.get(0).getKey())) {
             throw new AuthenticationCredentialsNotFoundException("API Key was not valid");
         }
 
-        DBEntry blogs = database.get(BLOG_POSTS_DB_KEY);
-        if (blogs == null) {
-            blogs = DBEntry.newBuilder().setByteValue(BlogPostMap.newBuilder().build().toByteString()).build();
-            database.put(BLOG_POSTS_DB_KEY, blogs);
-        }
-
         try {
-            BlogPostMap blogMap = BlogPostMap.parseFrom(blogs.getByteValue());
-            Map<String, BlogPost> updatedBlogs = blogMap.getPostsMap();
-
             boolean isPublic = Boolean.parseBoolean(isPublicString);
             Instant currentInstant = Instant.now();
             Timestamp currentTime = Timestamp.newBuilder().setSeconds(currentInstant.getEpochSecond())
                     .setNanos(currentInstant.getNano()).build();
             Timestamp publishDate = currentTime;
 
-            if (blogMap.containsPosts(blogId)) {
+            BlogPost currentPost = database.get(BlogPost.class, DB_COLLECTION_NAME, "blogId", blogId);
+
+            if (currentPost != null) {
                 log.info("Updating blog with post id {}", blogId);
 
-                if (updatedBlogs.get(blogId).getIsPublic()) {
-                    publishDate = updatedBlogs.get(blogId).getPublishDate();
+                if (currentPost.getIsPublic()) {
+                    publishDate = currentPost.getPublishDate();
                 }
             }
 
@@ -78,8 +72,11 @@ public class BlogApiController {
                         .setIsPublic(isPublic).setPublishDate(publishDate).setLastEdited(currentTime)
                         .setContentFilePath(BLOG_POSTS_FOLDER + blogId).build();
 
-                database.put(BLOG_POSTS_DB_KEY, DBEntry.newBuilder().setByteValue(BlogPostMap.newBuilder()
-                        .putAllPosts(updatedBlogs).putPosts(blogId, newOrUpdatedPost).build().toByteString()).build());
+                if (currentPost != null) {
+                    database.update(DB_COLLECTION_NAME, "blogId", blogId, newOrUpdatedPost);
+                } else {
+                    database.put(DB_COLLECTION_NAME, newOrUpdatedPost);
+                }
                 return ResponseEntity.ok().body("Successfully uploaded blog post: " + blogTitle);
             } else {
                 return ResponseEntity.internalServerError().build();
@@ -96,7 +93,9 @@ public class BlogApiController {
             @RequestHeader("api_key") String apiKey,
             @RequestHeader("blog_id") String blogId,
             @RequestHeader("image_name") String imageName) {
-        if (!BCrypt.checkpw(apiKey, database.get(BLOG_POSTS_API_KEY).getStringValue())) {
+        
+        List<APIKey> apiKeys = database.getAll(APIKey.class, "api_keys");
+        if (apiKeys.isEmpty() || !BCrypt.checkpw(apiKey, apiKeys.get(0).getKey())) {
             throw new AuthenticationCredentialsNotFoundException("API Key was not valid");
         }
         log.info("ATTACHING FILE");
