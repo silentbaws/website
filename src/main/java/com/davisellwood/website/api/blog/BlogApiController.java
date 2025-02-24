@@ -44,7 +44,8 @@ public class BlogApiController {
             @RequestHeader("api_key") String apiKey,
             @RequestHeader("is_public") String isPublicString,
             @RequestHeader("blog_id") String blogId,
-            @RequestHeader("blog_title") String blogTitle) {
+            @RequestHeader("blog_title") String blogTitle,
+            @RequestHeader("description") String description) {
         List<APIKey> apiKeys = database.getAll(APIKey.class, "api_keys");
         if (apiKeys.isEmpty() || !BCrypt.checkpw(apiKey, apiKeys.get(0).getKey())) {
             throw new AuthenticationCredentialsNotFoundException("API Key was not valid");
@@ -68,9 +69,15 @@ public class BlogApiController {
             }
 
             if (objectStore.put(BLOG_POSTS_FOLDER + blogId, body.getBytes(StandardCharsets.UTF_16LE))) {
-                BlogPost newOrUpdatedPost = BlogPost.newBuilder().setBlogId(blogId).setTitle(blogTitle)
-                        .setIsPublic(isPublic).setPublishDate(publishDate).setLastEdited(currentTime)
-                        .setContentFilePath(BLOG_POSTS_FOLDER + blogId).build();
+                BlogPost newOrUpdatedPost = BlogPost.newBuilder()
+                        .setBlogId(blogId)
+                        .setTitle(blogTitle)
+                        .setIsPublic(isPublic)
+                        .setPublishDate(publishDate)
+                        .setLastEdited(currentTime)
+                        .setContentFilePath(BLOG_POSTS_FOLDER + blogId)
+                        .setDescription(description)
+                        .build();
 
                 if (currentPost != null) {
                     database.update(DB_COLLECTION_NAME, "blogId", blogId, newOrUpdatedPost);

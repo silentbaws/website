@@ -24,11 +24,9 @@ public class BlogMarkdownRenderer {
             StrikethroughExtension.create(),
             FootnotesExtension.create());
 
-    private final Parser.Builder parserBuilder;
     private final HtmlRenderer htmlRenderer;
 
     public BlogMarkdownRenderer() {
-        this.parserBuilder = Parser.builder().extensions(EXTENSIONS);
         htmlRenderer = HtmlRenderer.builder()
                 .attributeProviderFactory(new CustomAttributeProvider.Factory())
                 .nodeRendererFactory(new CustomNodeRenderer.Factory())
@@ -38,7 +36,10 @@ public class BlogMarkdownRenderer {
 
     // TODO: Caching?
     public String renderMarkdown(String blogId, String markdown) {
-        Parser markdownParser = parserBuilder.linkProcessor(new CustomLinkProcessor(blogId)).build();
+        Parser markdownParser = Parser.builder()
+                .extensions(EXTENSIONS)
+                .linkProcessor(new CustomLinkProcessor(blogId))
+                .build();
         Node document = markdownParser.parse(markdown);
         return htmlRenderer.render(document);
     }
