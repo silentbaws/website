@@ -22,7 +22,10 @@ jobs:
           cache: maven
           distribution: corretto
       - name: Maven Build
-        run: ./mvnw spring-boot:build-image -DimageName=registry.digitalocean.com/davisellwoodwebsite/website:latest
+        run: ./mvnw install --no-transfer-progress
+      - name: tag docker image
+        run:
+           docker tag davisellwood/website:latest registry.digitalocean.com/davisellwoodwebsite/website:latest
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
