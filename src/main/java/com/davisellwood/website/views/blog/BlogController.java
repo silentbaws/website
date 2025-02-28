@@ -78,7 +78,7 @@ public class BlogController {
             return ERROR_404_PAGE;
         }
 
-        String markdownContent = new String(markdownContentBytes.get(), StandardCharsets.UTF_16LE);
+        String markdownContent = new String(markdownContentBytes.get(), StandardCharsets.UTF_8);
 
         model.addAttribute("publishDate", convertEpochSecondsToTimestamp(post.getPublishDate().getSeconds()));
         model.addAttribute("lastUpdatedDate", convertEpochSecondsToTimestamp(post.getLastEdited().getSeconds()));

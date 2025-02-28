@@ -15,6 +15,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -44,8 +46,8 @@ public class BlogApiController {
             @RequestHeader("api_key") String apiKey,
             @RequestHeader("is_public") String isPublicString,
             @RequestHeader("blog_id") String blogId,
-            @RequestHeader("blog_title") String blogTitle,
-            @RequestHeader("description") String description) {
+            @RequestHeader("blog_title") String blogTitleB64,
+            @RequestHeader("description") String descriptionB64) {
         List<APIKey> apiKeys = database.getAll(APIKey.class, "api_keys");
         if (apiKeys.isEmpty() || !BCrypt.checkpw(apiKey, apiKeys.get(0).getKey())) {
             throw new AuthenticationCredentialsNotFoundException("API Key was not valid");
@@ -68,7 +70,10 @@ public class BlogApiController {
                 }
             }
 
-            if (objectStore.put(BLOG_POSTS_FOLDER + blogId, body.getBytes(StandardCharsets.UTF_16LE))) {
+            String blogTitle = new String(Base64.decodeBase64(blogTitleB64), StandardCharsets.UTF_8);
+            String description = new String(Base64.decodeBase64(descriptionB64), StandardCharsets.UTF_8);
+
+            if (objectStore.put(BLOG_POSTS_FOLDER + blogId, body.getBytes(StandardCharsets.UTF_8))) {
                 BlogPost newOrUpdatedPost = BlogPost.newBuilder()
                         .setBlogId(blogId)
                         .setTitle(blogTitle)
